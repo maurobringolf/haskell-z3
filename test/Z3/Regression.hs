@@ -16,9 +16,14 @@ spec = do
     it "should not crash" $
       Z3.Monad.evalZ3 issue23script `shouldReturn` Z3.Monad.Unsat
 
+  describe "issue#28: modelToString" $ do
+    it "should create a text representation of model" $
+      Z3.Monad.evalZ3 issue28script `shouldNotReturn` Just ""
+
   describe "issue#29: evalBv" $ do
     it "should correctly evaluate example" $
       Z3.Monad.evalZ3 issue29script `shouldReturn` Just 35
+
 
 issue23script :: Z3.Monad.Z3 Z3.Monad.Result
 issue23script = do
@@ -26,6 +31,13 @@ issue23script = do
   forM_ asts $ \ast -> do
     Z3.Monad.assert ast
   Z3.Monad.check
+
+issue28script :: Z3.Monad.Z3 (Maybe String)
+issue28script = do
+  a <- Z3.Monad.mkFreshBoolVar "a"
+  b <- Z3.Monad.mkFreshBoolVar "b"
+  Z3.Monad.assert =<< Z3.Monad.mkEq a b
+  snd <$> Z3.Monad.withModel Z3.Monad.modelToString
 
 issue29script :: Z3.Monad.Z3 (Maybe Integer)
 issue29script = do
